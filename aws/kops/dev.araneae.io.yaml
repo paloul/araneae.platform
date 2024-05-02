@@ -1,0 +1,290 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: null
+  name: dev.araneae.io
+spec:
+  api:
+    loadBalancer:
+      class: Network
+      type: Public
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://kops-state-store-araneae/dev.araneae.io
+  etcdClusters:
+  - cpuRequest: 200m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: control-plane-us-west-2a
+      name: a
+    - encryptedVolume: true
+      instanceGroup: control-plane-us-west-2b
+      name: b
+    - encryptedVolume: true
+      instanceGroup: control-plane-us-west-2c
+      name: c
+    manager:
+      backupRetentionDays: 90
+    memoryRequest: 100Mi
+    name: main
+  - cpuRequest: 100m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: control-plane-us-west-2a
+      name: a
+    - encryptedVolume: true
+      instanceGroup: control-plane-us-west-2b
+      name: b
+    - encryptedVolume: true
+      instanceGroup: control-plane-us-west-2c
+      name: c
+    manager:
+      backupRetentionDays: 90
+    memoryRequest: 100Mi
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+    useServiceAccountExternalPermissions: true
+  kubelet:
+    anonymousAuth: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  - ::/0
+  kubernetesVersion: 1.28.6
+  masterPublicName: api.dev.araneae.io
+  networkCIDR: 172.20.0.0/16
+  networking:
+    calico: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  serviceAccountIssuerDiscovery:
+    discoveryStore: s3://kops-oidc-store-araneae/dev.araneae.io/discovery/dev.araneae.io
+    enableAWSOIDCProvider: true
+  ##################
+  # Managed kOps Addons
+  # https://kops.sigs.k8s.io/addons/
+  # https://kops.sigs.k8s.io/addons/#available-addons
+  awsLoadBalancerController: # https://kops.sigs.k8s.io/addons/#aws-load-balancer-controller
+    enabled: true
+    #enableWAF: true
+    #enableWAFv2: true
+    #enableShield: true
+  clusterAutoscaler: # https://kops.sigs.k8s.io/addons/#cluster-autoscaler
+    enabled: true
+    expander: least-waste
+    balanceSimilarNodeGroups: false
+    awsUseStaticInstanceList: false
+    scaleDownUtilizationThreshold: "0.5"
+    skipNodesWithCustomControllerPods: true
+    skipNodesWithLocalStorage: true
+    skipNodesWithSystemPods: true
+    newPodScaleUpDelay: 0s
+    scaleDownDelayAfterAdd: 10m0s
+    scaleDownUnneededTime: 10m0s
+    scaleDownUnreadyTime: 20m0s
+    cpuRequest: "100m"
+    memoryRequest: "300Mi"
+  metricsServer: # https://kops.sigs.k8s.io/addons/#metrics-server
+    enabled: true
+    insecure: false
+  certManager: # https://kops.sigs.k8s.io/addons/#cert-manager
+    enabled: true
+    hostedZoneIDs:
+      - Z03766603NEQGG30JJN7 # araneae.io hosted zone
+  kubeDNS: # https://kops.sigs.k8s.io/addons/#node-local-dns-cache
+    provider: CoreDNS
+    nodeLocalDNS:
+      enabled: true
+      memoryRequest: 5Mi
+      cpuRequest: 25m
+  podIdentityWebhook: # https://kops.sigs.k8s.io/addons/#pod-identity-webhook
+    enabled: true
+  nodeTerminationHandler: # https://kops.sigs.k8s.io/addons/#node-termination-handler
+    cpuRequest: 200m
+    enabled: true
+    #enableRebalanceMonitoring: true
+    enableSQSTerminationDraining: true
+    managedASGTag: "aws-node-termination-handler/managed"
+    #prometheusEnable: true
+    webhookURL: "https://hooks.slack.com/services/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"
+  nodeProblemDetector: # https://kops.sigs.k8s.io/addons/#node-problem-detector
+    enabled: true
+    memoryRequest: 32Mi
+    cpuRequest: 10m
+  ##################
+  sshAccess:
+  - 0.0.0.0/0
+  - ::/0
+  subnets:
+  - cidr: 172.20.64.0/18
+    name: us-west-2a
+    type: Private
+    zone: us-west-2a
+  - cidr: 172.20.128.0/18
+    name: us-west-2b
+    type: Private
+    zone: us-west-2b
+  - cidr: 172.20.192.0/18
+    name: us-west-2c
+    type: Private
+    zone: us-west-2c
+  - cidr: 172.20.0.0/21
+    name: utility-us-west-2a
+    type: Utility
+    zone: us-west-2a
+  - cidr: 172.20.8.0/21
+    name: utility-us-west-2b
+    type: Utility
+    zone: us-west-2b
+  - cidr: 172.20.16.0/21
+    name: utility-us-west-2c
+    type: Utility
+    zone: us-west-2c
+  topology:
+    bastion:
+      bastionPublicName: bastion.dev.araneae.io
+    dns:
+      type: Public
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: control-plane-us-west-2a
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: m4.large
+  maxSize: 1
+  minSize: 1
+  role: Master
+  subnets:
+  - us-west-2a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: control-plane-us-west-2b
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: m4.large
+  maxSize: 1
+  minSize: 1
+  role: Master
+  subnets:
+  - us-west-2b
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: control-plane-us-west-2c
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: m4.large
+  maxSize: 1
+  minSize: 1
+  role: Master
+  subnets:
+  - us-west-2c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: nodes-us-west-2a
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: m4.xlarge
+  maxSize: 1
+  minSize: 1
+  role: Node
+  subnets:
+  - us-west-2a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: nodes-us-west-2b
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: m4.xlarge
+  maxSize: 1
+  minSize: 1
+  role: Node
+  subnets:
+  - us-west-2b
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: nodes-us-west-2c
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: m4.xlarge
+  maxSize: 1
+  minSize: 1
+  role: Node
+  subnets:
+  - us-west-2c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: bastions
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
+  machineType: t3.micro
+  maxSize: 1
+  minSize: 1
+  role: Bastion
+  subnets:
+  - us-west-2a
+  - us-west-2b
+  - us-west-2c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: SSHCredential
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: dev.araneae.io
+  name: admin
+spec:
+  publicKey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGF/imfZZutjAz85oFCidLuEyFOJyiFRrsGZGvDTV4fP7qwpoc9hBSEYUqMEQKcIoQPJjsRirswGMiZnLCKgYCwj3LktRjZMQ5at+GhV8dHov1Q6t++LOV2xWmoBjSnggXcwJuLhF2Qb1O2Cnvvi9Dk9KXeiAxPOkU1sCWInLGQIzSDRBBuCA5QuTla2x5xfkWM11p1vLtvSB4c0QzQpSJ5cdA3Z68UFqKexJc0N+FrMjPphurYk5Zq3Uy/4VdxzJrFvdZ1FNQN3UU8qTpnUsyLNF1yFcFt4GGqay7x/WOROraV5zFhDDd35mHc+TZltJREkorqAhfyGJB7Is6yIp+DGwrE/GTgADSBfLmTaNQJN98yzB2VoYi+HNeJKm2rICloq8LwbMbHp2kcQPKMlCX1fEuhgP/3iHCD2RcdWfyxF3/K72RAXaJkq8oGOoDShVYPxUndS4lsJSivF4FdyKiSzxevUepldBlI9aRsuUw1zD/VwVMhHPrJAq3GO7XDS0=
+    paloul@Georges-MacBook-Pro.local

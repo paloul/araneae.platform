@@ -1,0 +1,45 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gateway-argocd
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - argocd.dev.araneae.io
+      tls:
+        httpsRedirect: true
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - argocd.dev.araneae.io
+      tls:
+        credentialName: argocd-server-tls
+        mode: SIMPLE
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: istio-ingressgateway-argocd
+  namespace: istio-system
+spec:
+  action: ALLOW
+  selector:
+    # Same as the istio-ingressgateway Service selector,
+    # look in istio/istio-spec.yaml which defines and configures the Load Balancer instance
+    matchLabels:
+      app: istio-ingressgateway
+      istio: ingressgateway
+  rules:
+    - to:
+        - operation:
+            # These are hosts ingress gateway should allow
+            hosts: ["argocd.dev.araneae.io"] # Add additional hosts here

@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: gateways-cert-issuer
+  namespace: kube-system # The cert-manager addon with kops is installed in kube-system namespace
+spec:
+  acme:
+    # You must replace this email address with your own.
+    # Let's Encrypt will use this to contact you about expiring
+    # certificates, and issues related to your account.
+    email: paloul@outlook.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory # Staging level
+    #server: https://acme-v02.api.letsencrypt.org/directory # Prod level
+    privateKeySecretRef:
+      name: gateways-cert-issuer-account-key
+    # Add challenge solver
+    solvers:
+      - dns01:
+          route53:
+            region: us-west-2 # Oregon
+            hostedZoneID: Z03766603NEQGG30JJN7 # Should be defined in the cert-manager section in kops config too
+            accessKeyIDSecretRef:
+              name: route53-credentials-secret
+              key: access-key-id
+            secretAccessKeySecretRef:
+              name: route53-credentials-secret
+              key: secret-access-key

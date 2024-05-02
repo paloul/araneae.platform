@@ -1,0 +1,91 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: istio
+spec:
+  profile: default
+  tag: 1.21.1 # istio/operator
+  hub: docker.io/istio
+  meshConfig:
+    accessLogFile: /dev/stdout
+    enablePrometheusMerge: true
+    enableTracing: true
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          service:
+            type: LoadBalancer
+          serviceAnnotations:
+            service.beta.kubernetes.io/aws-load-balancer-name: "araneae-istio-ingressgateway-lb"
+            service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+            service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+            service.beta.kubernetes.io/aws-load-balancer-type: "external"
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+            proxy.istio.io/config: '{"gatewayTopology" : { "numTrustedProxies": 2 } }'
+            external-dns.alpha.kubernetes.io/hostname: argocd.dev.araneae.io
+
+      - name: cluster-local-gateway # Cluster-local gateway for KFServing
+        enabled: true
+        # https://github.com/istio/istio/issues/19263#issuecomment-615833092
+        label:
+          app: cluster-local-gateway
+          istio: cluster-local-gateway
+        k8s:
+          env:
+            - name: ISTIO_META_ROUTER_MODE
+              value: sni-dnat
+          hpaSpec:
+            maxReplicas: 5
+            metrics:
+              - resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 80
+                type: Resource
+            minReplicas: 1
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: cluster-local-gateway
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          service:
+            type: ClusterIP
+            ports:
+              - name: status-port
+                port: 15020
+                targetPort: 15020
+              - name: http2
+                port: 80
+                targetPort: 8080
+
+    # EgressGateway
+    egressGateways:
+      - name: istio-egressgateway
+        enabled: false
+  values:
+    global:
+      istiod:
+        enableAnalysis: true # see https://istio.io/latest/docs/reference/config/config-status/
+    pilot:
+      enableProtocolSniffingForOutbound: true
+      enableProtocolSniffingForInbound: true
+      autoscaleEnabled: true
+      autoscaleMax: 5
+      autoscaleMin: 1
+      configMap: true
+      cpu:
+        targetAverageUtilization: 80
+      env:
+        PILOT_ENABLE_STATUS: true # https://istio.io/latest/docs/reference/config/config-status/
+        PILOT_ENABLE_CONFIG_DISTRIBUTION_TRACKING: true # https://istio.io/latest/docs/reference/config/config-status/
+        PILOT_ENABLE_REDIS_FILTER: true # https://istio.io/latest/docs/reference/commands/pilot-discovery/#envvars
