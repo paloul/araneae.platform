@@ -31,3 +31,6 @@ data:
 
   # Disable TLS on the HTTP endpoint
   dexserver.disable.tls: "true"
+
+  # Disable TLS on connections to repo server
+  controller.repo.server.plaintext: "true"

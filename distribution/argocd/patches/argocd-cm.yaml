@@ -17,6 +17,9 @@ data:
   # disables admin user. Admin is enabled by default
   admin.enabled: "false"
 
+  # cluster.inClusterEnabled indicates whether to allow in-cluster server address. This is enabled by default.
+  cluster.inClusterEnabled: "true"
+
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex
   dex.config: |
     connectors:

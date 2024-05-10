@@ -13,8 +13,9 @@ data:
   #   g, subject, inherited-subject
   # See https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/rbac.md for additional information.
   policy.csv: |
-    # Grant all members of the group 'my-org:team-alpha; the ability to sync apps in 'my-project'
+    # Grant all members with 'role:araneae-admin' the ability to sync apps
     p, role:araneae-admin, applications, *, */*, allow
+    p, role:araneae-admin, certificates, *, */*, allow
     p, role:araneae-admin, clusters, get, *, allow
     p, role:araneae-admin, repositories, get, *, allow
     p, role:araneae-admin, repositories, create, *, allow
@@ -27,13 +28,13 @@ data:
     p, role:araneae-admin, logs, get, *, allow
     p, role:araneae-admin, exec, create, */*, allow
     
-    # Grant all members of 'paloul-cicd:araneae' admins
+    # Grant all members of 'paloul-cicd:araneae' the role of araneae-admin
     g, paloul-cicd:araneae, role:araneae-admin
 
   # policy.default is the name of the default role which Argo CD will falls back to, when
   # authorizing API requests (optional). If omitted or empty, users may be still be able to login,
   # but will see no apps, projects, etc...
-  policy.default: ""
+  policy.default: "" # Leave blank for no default policy. Chances are slim login possible, but better no default.
 
   # scopes controls which OIDC scopes to examine during rbac enforcement (in addition to `sub` scope).
   # If omitted, defaults to: '[groups]'. The scope value can be a string, or a list of strings.
