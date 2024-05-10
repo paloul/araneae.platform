@@ -46,10 +46,8 @@ kustomize build distribution/istio/ | kubectl apply -f -
 ```
 
 ### Step 3 - Deploy the Istio Resources that allow the platform to function
-~~Identify all potential hosts and their domains. Open the file `gateway-authorization-policy.yaml` and add all
-potential domains to the `hosts` array.~~ 
-The `istio-resources` folder has sub-folders for each piece of the platform that require istio routing and gateways.
-Duplicate a sub-folder and add functionality for any new pieces of the platform that you require.
+The `istio-resources` folder has sub-folders for each piece of the platform that require istio routing and gateways, 
+i.e. ArgoCD. Duplicate a sub-folder and add functionality for any new piece of the platform that you require.
 
 Make changes if any are necessary, then you can apply the istio resources:
 ```bash

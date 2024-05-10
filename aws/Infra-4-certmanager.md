@@ -20,7 +20,6 @@ Instructions and scripts to install [cert-manager](https://cert-manager.io/)
         hostedZoneIDs:
         - Z03766603NEQGG30JJN7 # araneae.io hosted zone
       ```
-
 --------------------------------------------
 
 ### Step 1 - Cluster Issuer - https://cert-manager.io/docs/configuration/
@@ -68,8 +67,12 @@ aws iam attach-group-policy \
   
 aws iam create-user --profile araneae --user-name certmanager-cluster-issuer
 
-aws iam add-user-to-group --profile araneae --user-name certmanager-cluster-issuer --group-name certmanager-cluster-issuer
+aws iam add-user-to-group \
+  --profile araneae \
+  --user-name certmanager-cluster-issuer \
+  --group-name certmanager-cluster-issuer
 
+# Make note of the access key and its secret key generated 
 aws iam create-access-key --profile araneae --user-name certmanager-cluster-issuer
 ```
 
