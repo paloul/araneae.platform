@@ -7,7 +7,12 @@
 ---
 Hello
 
-## *Why I made it*
+## *Why it exists*
+
+---
+Hello
+
+## *How its made*
 
 ---
 Hello
