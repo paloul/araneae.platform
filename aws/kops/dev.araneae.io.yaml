@@ -27,7 +27,7 @@ spec:
       name: c
     manager:
       backupRetentionDays: 90
-    memoryRequest: 100Mi
+    memoryRequest: 200Mi
     name: main
   - cpuRequest: 100m
     etcdMembers:
@@ -42,7 +42,7 @@ spec:
       name: c
     manager:
       backupRetentionDays: 90
-    memoryRequest: 100Mi
+    memoryRequest: 200Mi
     name: events
   iam:
     allowContainerRegistry: true
@@ -97,7 +97,7 @@ spec:
     provider: CoreDNS
     nodeLocalDNS:
       enabled: true
-      memoryRequest: 5Mi
+      memoryRequest: 15Mi
       cpuRequest: 25m
   podIdentityWebhook: # https://kops.sigs.k8s.io/addons/#pod-identity-webhook
     enabled: true
