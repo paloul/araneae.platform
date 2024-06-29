@@ -3,6 +3,8 @@ Keep track of what *to do* next and maintain a history of what was done.
 
 ### To Do
 - [ ] Rook-Ceph data infrastructure
+- [ ] Apache Pulsar cluster
+  - [ ] Separate Function runtime with k8s 
 - [ ] Implement and integrate auto-renewal for cert-manager owned certificates
 - [ ] istio-egressgateway
   - [ ] Enable egress gateway
@@ -11,7 +13,9 @@ Keep track of what *to do* next and maintain a history of what was done.
 
 
 ### In Progress
-
+- [ ] Minimize instance types of kops nodes
+- [ ] Apply nodes labels and taints to kops instance groups
+  - [ ] Apply taint tolerations to the infra utility pieces 
 
 ### Done
 - [x] Format To Do file

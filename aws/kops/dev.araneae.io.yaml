@@ -159,7 +159,7 @@ metadata:
   name: control-plane-us-west-2a
 spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
-  machineType: m4.large
+  machineType: m5.large
   maxSize: 1
   minSize: 1
   role: Master
@@ -177,7 +177,7 @@ metadata:
   name: control-plane-us-west-2b
 spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
-  machineType: m4.large
+  machineType: m5.large
   maxSize: 1
   minSize: 1
   role: Master
@@ -195,7 +195,7 @@ metadata:
   name: control-plane-us-west-2c
 spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
-  machineType: m4.large
+  machineType: m5.large
   maxSize: 1
   minSize: 1
   role: Master
@@ -210,13 +210,19 @@ metadata:
   creationTimestamp: null
   labels:
     kops.k8s.io/cluster: dev.araneae.io
-  name: nodes-us-west-2a
+    dev.araneae.io/node-type: utility
+  name: system-nodes-us-west-2a
 spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
-  machineType: m4.xlarge
-  maxSize: 1
+  machineType: m5.large
+  maxSize: 3
   minSize: 1
   role: Node
+  taints:
+    # https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    - node-type=utility:NoExecute # Restrict this instance group to only utility pods
+  nodeLabels:
+    node-type: "utility"
   subnets:
   - us-west-2a
 
@@ -228,13 +234,19 @@ metadata:
   creationTimestamp: null
   labels:
     kops.k8s.io/cluster: dev.araneae.io
-  name: nodes-us-west-2b
+    dev.araneae.io/node-type: utility
+  name: system-nodes-us-west-2b
 spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
-  machineType: m4.xlarge
-  maxSize: 1
+  machineType: m5.large
+  maxSize: 3
   minSize: 1
   role: Node
+  taints:
+    # https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    - node-type=utility:NoExecute # Restrict this instance group to only utility pods
+  nodeLabels:
+    node-type: "utility"
   subnets:
   - us-west-2b
 
@@ -246,13 +258,19 @@ metadata:
   creationTimestamp: null
   labels:
     kops.k8s.io/cluster: dev.araneae.io
-  name: nodes-us-west-2c
+    dev.araneae.io/node-type: utility
+  name: system-nodes-us-west-2c
 spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240126
-  machineType: m4.xlarge
-  maxSize: 1
+  machineType: m5.large
+  maxSize: 3
   minSize: 1
   role: Node
+  taints:
+    # https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    - node-type=utility:NoExecute # Restrict this instance group to only utility pods
+  nodeLabels:
+    node-type: "utility"
   subnets:
   - us-west-2c
 
