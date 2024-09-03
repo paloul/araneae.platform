@@ -2,7 +2,6 @@
 Keep track of what *to do* next and maintain a history of what was done. 
 
 ### To Do
-- [ ] Rook-Ceph data infrastructure
 - [ ] Apache Pulsar cluster
   - [ ] Separate Function runtime with k8s 
 - [ ] Implement and integrate auto-renewal for cert-manager owned certificates
@@ -13,9 +12,9 @@ Keep track of what *to do* next and maintain a history of what was done.
 
 
 ### In Progress
-- [ ] Minimize instance types of kops nodes
-- [ ] Apply nodes labels and taints to kops instance groups
-  - [ ] Apply taint tolerations to the infra utility pieces 
+- [ ] Rook-Ceph data infrastructure
+  - [ ] Create instance group for rook-ceph object storage
+  - [ ] Rook-Ceph Readme instructions
 
 ### Done
 - [x] Format To Do file
@@ -27,5 +26,9 @@ Keep track of what *to do* next and maintain a history of what was done.
   - [x] Readme for ExternalDNS for automatic dns entries
   - [x] Test execute the instructions in the ExternalDNS readme file
   - [x] Implement ExternalDNS for automatic dns entries
+- [x] Minimize instance types of kops nodes
+- [x] Apply nodes labels and taints to kops instance groups
+  - [x] Apply taint tolerations to the infra utility pieces
+    - This proves difficult for some of the operator based utilities like istio. *Not Doing*
 
 
