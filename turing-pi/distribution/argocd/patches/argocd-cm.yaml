@@ -1,0 +1,36 @@
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cm-yaml/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Argo CD's externally facing base URL (optional). Required when configuring SSO
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex
+  url: "https://argocd.dev.araneae.io"
+
+  # Disables anonymous user access. The anonymous users get default role permissions specified argocd-rbac-cm.yaml.
+  users.anonymous.enabled: "false"
+
+  # disables admin user. Admin is enabled by default
+  admin.enabled: "false"
+
+  # cluster.inClusterEnabled indicates whether to allow in-cluster server address. This is enabled by default.
+  cluster.inClusterEnabled: "true"
+
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex
+  dex.config: |
+    connectors:
+      # GitHub
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: $dex-oauth:dex.github.clientId
+          clientSecret: $dex-oauth:dex.github.clientSecret
+          orgs:
+          - name: $dex-oauth:dex.github.organization
+            teams:
+            - $dex-oauth:dex.github.team

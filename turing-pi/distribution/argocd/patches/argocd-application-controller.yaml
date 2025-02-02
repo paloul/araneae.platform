@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: argocd-application-controller
+spec:
+  template:
+    metadata:
+      annotations:
+        # Static IP for Kubernetes API in cluster.
+        # We need this here because istio sidecar security blocks containers
+        # from accessing Kubernetes API regardless of Service Account and roles
+        # associated with the pod.
+        # Set the traffic.sidecar.istio.io/excludeOutboundIPRanges annotation to
+        # disable redirecting traffic to any CIDRs the init containers communicate with.
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "100.64.0.1/32"

@@ -1,0 +1,14 @@
+# This file contains (k)customizations to the various specifications for argocd-redis pod defined
+# in the manifest for argocd-install.yaml file.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: argocd-redis-network-policy
+spec:
+  # There is a NetworkPolicy defined for argocd-redis that limits egress from the argocd-redis
+  # pod to only port 53 on tcp and udp. When ISTIO is enabled for the argocd namespace, this
+  # caused issues with the istio-proxy from reaching out to the rest of the istio service mesh.
+  # Here we remove the egress restrictions.
+  egress:
+    - {}

@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+  - namespace.yaml
+  - manifests/argocd-install-v2.10.6.yaml
+  - secrets/private-https-repo.yaml
+  - secrets/dex-oauth.yaml
+  - istio/virtualservice.yaml
+  - istio/authorization-policy.yaml
+
+patches:
+  - path: patches/argocd-cm.yaml
+  - path: patches/argocd-redis.yaml
+  - path: patches/argocd-rbac-cm.yaml
+  - path: patches/argocd-cmd-params-cm.yaml
+  # The patches below mainly define `traffic.sidecar.istio.io/excludeOutboundIPRanges` annotation
+  - path: patches/argocd-server.yaml
+  - path: patches/argocd-application-controller.yaml
+  - path: patches/argocd-notifications-controller.yaml
