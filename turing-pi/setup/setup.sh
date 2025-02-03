@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# This script is a rundown of the manual steps taken to setup and configure the araneae platform for gitflow
+# practice using ArgoCD. It preps the environment to support deployment of the application with ArgoCD.
+# It is not intended to be run as a complete end-to-end script to configure. Review it and choose
+# the steps needed.
+
 # Setup Master Node on ubuntu-rock1
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644 --disable servicelb --token kelda-araneae --node-ip 192.168.68.68 --disable-cloud-controller --disable local-storage 
 
@@ -75,6 +80,43 @@ helm install longhorn longhorn/longhorn --namespace longhorn-system \
  --set service.ui.loadBalancerIP="192.168.70.11" --set service.ui.type="LoadBalancer"
 
 ############################################################
+
+
+############################################################
+# Install KubeSeal OSX/Linux client and SealedSecrets k8s controller on the cluster
+
+# https://github.com/bitnami-labs/sealed-secrets
+
+# Sealed Secrets is composed of two parts:
+#  1. A cluster-side controller / operator
+#  2. A client-side utility: kubeseal
+
+# The kubeseal client should be installed where the project's k8s configuration is located and source is controlled
+# kubeseal can be installed either on OSX/Linux or a Master Node on the k8s cluster itself as long as kubectl to the
+# cluster is available and configured, and the sealed secrets are able to be source controlled along with the project's
+# k8s configuration files for ArgoCD and Gitflow processes
+
+# As of Feb 2 2025, the latest version is 0.28.0
+# Set this to, for example, KUBESEAL_VERSION='0.28.0'
+KUBESEAL_VERSION='0.28.0' # The version needs to match for kubeseal cli and the controller CRD on k8s cluster
+
+# kubeseal client installation
+# OSX: Available on brew. Check the versions first, as the kubeseal client needs to match the controller on k8s
+brew info kubeseal # check the version avail on Homebrew
+brew install kubeseal
+# OR: Linux: Manual installation, and make sure the version matches the controller you install on k8s
+curl -OL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION:?}/kubeseal-${KUBESEAL_VERSION:?}-linux-amd64.tar.gz"
+tar -xvzf kubeseal-${KUBESEAL_VERSION:?}-linux-amd64.tar.gz kubeseal
+sudo install -m 755 kubeseal /usr/local/bin/kubeseal
+
+# Check version installed
+## ➜  ~ kubeseal --version
+## kubeseal version: v0.28.0
+
+# Install the SealedSecret CRD and server-side controller into the kube-system namespace
+kubectl apply -f "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION:?}/controller.yaml"
+############################################################
+
 
 
 ############################################################
